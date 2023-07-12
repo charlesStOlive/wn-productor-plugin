@@ -1,0 +1,45 @@
+<?= Form::open() ?>
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h5><?= e(trans('waka.mailer::wakamail.create')) ?></h5>
+        </div>
+        <div class="modal-body">
+            <?= $this->makePartial('~/plugins/waka/productor/behaviors/productorbehavior/_condition.htm') ?>
+            <input id="modelId" name="modelId" type="hidden" value="<?= $modelId ?>">
+            <div class="form-group">
+                <select class="form-control custom-select" data-request="onSelectProductor" data-request-loading="#wakaLoading" name="productorId">
+                    <option value="" disabled selected><?= e(trans('waka.productor::lang.popup_creator.placeholder_model')) ?></option>
+                    <?php foreach ($driver as $driverkey => $value) : ?>
+                        <optgroup label="<?= $value['label'] ?>">
+                            <?php 
+                            $productor = $value['prouctors'] ?? [];
+                            foreach ($productor as $productorKey => $value) : ?>
+                                <option value="<?=$driverkey?>::<?=$productorKey?>"><?=$value?></option>
+                            <?php endforeach ?>
+                        </optgroup>
+                <?php endforeach ?>
+                </select>
+            </div>
+            <div class="">
+                <div id="productorWidget">
+                    <!--Emplacement pour les data-->
+                </div>
+                <div id="asksWidget">
+                    <!--Emplacement pour les data-->
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer m-t">
+            <?= $this->makePartial('~/plugins/waka/utils/views/wakaLoading.htm') ?>
+            <button type="button" class="btn btn-default" data-dismiss="popup">
+                <?= e(trans('waka.wutils::lang.global.termined')) ?>
+            </button>
+        </div>
+    </div>
+</div>
+
+<?= Form::close() ?>
