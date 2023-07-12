@@ -1,0 +1,16 @@
+{
+    "name": "waka/wn-productor-plugin",
+    "description": "Système optionel permettant de génerer des documents dans les controller de winter.cms/waka",
+    "type": "winter-plugin",
+    "require": {
+         "waka/wn-wutils-plugin": "dev-test",
+         "waka/wn-ds-plugin": "dev-test"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Charles Saint Olive",
+            "email": "contact@notilac.fr"
+        }
+    ]
+}
