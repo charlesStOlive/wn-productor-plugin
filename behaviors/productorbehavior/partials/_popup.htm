@@ -1,45 +1,61 @@
 <?= Form::open() ?>
 
-<div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h5><?= e(trans('waka.mailer::wakamail.create')) ?></h5>
-        </div>
-        <div class="modal-body">
-            <?= $this->makePartial('~/plugins/waka/productor/behaviors/productorbehavior/_condition.htm') ?>
-            <input id="modelId" name="modelId" type="hidden" value="<?= $modelId ?>">
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 class="modal-title"><?= e(trans('waka.productor::lang.behavior.popup.create')) ?></h3>
+    </div>
+    <div class="modal-body">
+        <input id="modelId" name="modelId" type="hidden" value="<?= $modelId ?>">
+        <div id="productorWidget">
             <div class="form-group">
-                <select class="form-control custom-select" data-request="onSelectProductor" data-request-loading="#wakaLoading" name="productorId">
-                    <option value="" disabled selected><?= e(trans('waka.productor::lang.popup_creator.placeholder_model')) ?></option>
-                    <?php foreach ($driver as $driverkey => $value) : ?>
-                        <optgroup label="<?= $value['label'] ?>">
-                            <?php 
-                            $productor = $value['prouctors'] ?? [];
-                            foreach ($productor as $productorKey => $value) : ?>
-                                <option value="<?=$driverkey?>::<?=$productorKey?>"><?=$value?></option>
-                            <?php endforeach ?>
-                        </optgroup>
-                <?php endforeach ?>
-                </select>
-            </div>
-            <div class="">
-                <div id="productorWidget">
-                    <!--Emplacement pour les data-->
-                </div>
-                <div id="asksWidget">
-                    <!--Emplacement pour les data-->
+                <div class="custom-select" id="driverCode">
+                    <?php foreach ($drivers as $driverkey => $value) :
+                        $productors = $value['productors'];
+                        if (count($productors)) : ?>
+                            <div class="optgroup-label"><?= $value['label'] ?>
+                                <div>
+                                    <?php
+                                    foreach ($productors as $productorKey => $value) :
+                                        if ($value['popup'] ?? false) :
+                                    ?>
+                                            <button class="option" data-handler="<?= $productorKey ?>" data-control="popup" data-request-loading="#wakaLoading2" data-dismiss="popup">
+                                                <?= $value['name'] ?>
+                                            </button>
+                                        <?php elseif ($driverkey == 'handlers') : ?>
+                                            <button class="option" data-request="<?= $productorKey ?>" data-dismiss="popup">
+                                                <?= $value['name'] ?>
+                                            </button>
+                                        <?php else : ?>
+                                            <button class="option" data-request="onSelectProductor" data-request-data="driverCode:'<?= $driverkey ?>',productorSlug:'<?= $productorKey ?>'" data-request-loading="#wakaLoading2">
+                                                <?= $value['name'] ?>
+                                            </button>
+                                        <?php endif ?>
+                                    <?php endforeach ?>
+                                </div>
+                            </div>
+                        <?php endif ?>
+                    <?php endforeach ?>
                 </div>
             </div>
         </div>
-
-        <div class="modal-footer m-t">
-            <?= $this->makePartial('~/plugins/waka/utils/views/wakaLoading.htm') ?>
-            <button type="button" class="btn btn-default" data-dismiss="popup">
-                <?= e(trans('waka.wutils::lang.global.termined')) ?>
-            </button>
+        <div class="">
+            <div id="wakaLoading2" class="loading-indicator-container" style="display:none">
+                <div class="loading-indicator">
+                    <span></span>
+                    <div>Veuillez patienter...</div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<?= Form::close() ?>
+    <div id="extraContent"></div>
+
+    <div class="modal-footer m-t">
+        <div class="loading-indicator-container">
+            <div id="productorModalBtns">
+                <?= $this->makePartial('~/plugins/waka/productor/behaviors/productorbehavior/partials/_btns.htm') ?>
+            </div>
+        </div>
+    </div>
+    <?= Form::close() ?>

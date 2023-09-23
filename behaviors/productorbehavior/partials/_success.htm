@@ -1,0 +1,14 @@
+<div class="callout fade in callout-success">
+    <div class="header">
+        <i class="icon-check"></i>
+        <h3>Succès</h3>
+        <p><?= $message ?></p>
+    </div>
+    <div class="content">
+        <?php if ($closeBtn['label'] ?? false) : ?>
+        <button type="button" <?php if ($request = $closeBtn['request'] ?? false) : ?>data-request="<?= $request ?>" <?php endif ?> <?php if ($link = $closeBtn['link'] ?? false) : ?>data-request-data="link:'<?= $link ?>'" <?php endif ?> class="btn btn-success" data-dismiss="popup">
+            <?= e(trans($closeBtn['label'] ?? '')) ?>
+        </button>
+        <?php endif ?>
+    </div>
+</div>

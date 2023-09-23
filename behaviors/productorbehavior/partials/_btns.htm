@@ -1,0 +1,24 @@
+<?php if (isset($productorBtns)) : ?>
+    <?php foreach ($productorBtns as $btn) : ?>
+        <button type="button"
+                data-request="onExecute"
+                data-request-data="handler:'<?=$btn['handler']?>'"
+                data-load-indicator="En cours..."
+                class="btn btn-default"
+                >
+            <?= e(trans($btn['label'])) ?>
+        </button>
+    <?php endforeach ?>
+<?php endif ?>
+
+<?php if (isset($restartBtn)) : ?>
+<button type="button" data-handler="onLauchProductor" data-dismiss="popup" data-control="popup" data-size="giant" data-request-data="modelId:<?=$this->params[0] ?? false?>"  class="btn btn-success wn-icon-tools" style="text-align: center">
+    Recommencer
+</button>
+<?php endif ?>
+
+<?php if (!isset($closeBtn)) : ?>
+<button type="button" class="btn btn-default" data-dismiss="popup">
+    <?= e(trans('waka.productor::lang.behavior.popup.btn.close')) ?>
+</button>
+<?php endif ?>

@@ -2,127 +2,190 @@
 
 namespace Waka\Productor\Classes\Traits;
 
+use System\Classes\PluginManager;
 use Closure;
+use Waka\Wutils\Classes\PermissionsChecker;
 
 trait TraitProductor
 {
-    /**
-     * Sauvegarde le PDF généré à partir d'un template HTML vers un chemin spécifié.
-     *
-     * @param string $template
-     * @param string $path
-     * @param array $vars
-     * @param Closure $callback
-     * @return string
-     */
-    public static function send($template, $vars, $options, Closure $callback)
-    {
-        if (!self::isMethodAllowed('send')) {
-            return null;
-        }
-        // Créer l'instance de pdf
-        $creator = self::instanciateCreator($template, $vars, $options);
-        // Appeler le callback pour définir les options
-        $callback($creator);
-
-        try {
-            return $creator->send();
-        } catch (\Exception $ex) {
-            throw new \ApplicationException($ex);
-        }
-    }
-
-    public static function show($template, $vars, $options, Closure $callback)
-    {
-        if (!self::isMethodAllowed('show')) {
-            return null;
-        }
-        // Créer l'instance de pdf
-        $creator = self::instanciateCreator($template, $vars, $options);
-        // Appeler le callback pour définir les options
-        $callback($creator);
-        // Sauver le fichier pdf. 
-        try {
-            return $creator->show();
-        } catch (\Exception $ex) {
-            throw new \ApplicationException($ex);
-        }
-    }
-
-    public static function download($template, $vars, $options,  Closure $callback)
-    {
-        if (!self::isMethodAllowed('download')) {
-            return null;
-        }
-        // Créer l'instance de pdf
-        $creator = self::instanciateCreator($template, $vars, $options);
-        // Appeler le callback pour définir les options
-        $callback($creator);
-        // Sauver le fichier pdf. 
-        try {
-            return $creator->download();
-        } catch (\Exception $ex) {
-            throw new \ApplicationException($ex);
-        }
-    }
-
-    public static function saveTo($template, $vars, $options, $path, Closure $callback)
-    {
-        if (!self::isMethodAllowed('saveTo')) {
-            return null;
-        }
-        // Créer l'instance de pdf
-        $creator = self::instanciateCreator($template, $vars, $options);
-        // Appeler le callback pour définir les options
-        $callback($creator);
-        // Sauver le fichier pdf. 
-        try {
-            return $creator->saveTo($path);
-        } catch (\Exception $ex) {
-            throw new \ApplicationException($ex);
-        }
-    }
 
     /**
-     * Instancie un objet Browsershot avec une URL.
+     * Instancieation de la class creator
      *
      * @param string $url
      * @return \Spatie\Browsershot\Browsershot
      */
-    private static function instanciateCreator($template, $vars, $options)
+    private static function instanciateCreator(string $templateCode, array $vars, array $options)
     {
-        $prductorClass = self::getConfig()['productorCreator'];
-        $mail = new $prductorClass($template, $vars, $options);
-        return $mail;
+        $productorClass = self::getConfig()['productorCreator'];
+        $class = new $productorClass($templateCode, $vars, $options);
+        return $class;
     }
 
-    public static function getProductors($driverConfig, $modelClass, $user)
+    public static function getProductor($slug)
     {
-        trace_log($driverConfig);
-        $permissions = $driverConfig['permissions'] ?? null;
-        $exclude = $driverConfig['exclude'] ?? null;
-        $productorModel = self::getConfig()['productorModel'];
-        $productors;
-        //Filtre sur les permissions
-        trace_log('temp');
-        if (strpos($permissions, '*') !== false) {
-            $permissions = str_replace('*', '%', $permissions);
-            $productors = $productorModel::where('slug', 'like', $permissions);
+        $productorClass = self::getConfig()['productorModel'];
+        if (method_exists($productorClass, 'findBySlug')) {
+            //trace_log('find by clug existe************');
+            return $productorClass::findBySlug($slug);
         } else {
-            $productors = $productorModel::where('slug', $permissions);
-        }
-
-        return $productors->get(['name', 'slug', 'id'])->keyby('id')->toArray();
-
-    }
-
-    private static function isMethodAllowed($methodName)
-    {
-        $configMethods =  self::config()['methods'];
-        if (in_array($methodName, $configMethods)) {
-            return true;
-        } else {
-            return false;
+            //trace_log('find by clug existe PAS ************');
+            //trace_log($productorClass);
+            return $productorClass::where('slug', $slug)->first();
         }
     }
+
+    public static function getProductors($driverConfig, $globalPermissions = [])
+    {
+        //trace_log('driverConfig!', $driverConfig);
+        //trace_log('globalPermissions', $globalPermissions);
+        $pc = new PermissionsChecker();
+        $globalPermissions = $globalPermissions;
+        $pc->mergeRules($globalPermissions);
+        $driverPermissions = $driverConfig['permissions'] ?? [];
+        $pc->mergeRules($driverPermissions);
+        // Recherche dans les fichiers enregistrés.
+        $staticTemplatesList = [];
+        if ($registrerFnc = self::getConfig()['productorFilesRegistration'] ?? false) {
+            $templatesData = PluginManager::instance()->getRegistrationMethodValues($registrerFnc);
+            $templatesData = self::flattenPluginBundle($templatesData);
+            $pc->mergeKeyedRules($templatesData);
+        }
+        $noProductodBdd = self::getConfig()['noproductorBdd'] ?? false;
+        if (!$noProductodBdd) {
+            $productorModel = self::getConfig()['productorModel'];
+            // Filtre sur les permissions
+            $bddTemplatesList = $productorModel::get(['name', 'slug'])->keyBy('slug')->toArray();
+            $pc->mergeKeyedRules($bddTemplatesList);
+        }
+        $autorisedTemplates = $pc->checkKeyedCodes();
+        return $autorisedTemplates;
+    }
+
+    private static function flattenPluginBundle($array)
+    {
+        $newArray = [];
+
+        foreach ($array as $subArray) {
+            foreach ($subArray as $key => $value) {
+                $newArray[$key] = $value;
+            }
+        }
+        return $newArray;
+    }
+
+    // private static function isMethodAllowed($methodName)
+    // {
+    //     $configMethods =  self::getConfig()['methods'];
+    //     if (in_array($methodName, $configMethods)) {
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
+
+    private static function getAndSetAsks($productorModel, $formWidget)
+    {
+        if (method_exists(get_class($productorModel), 'getProductorAsks')) {
+            //trace_log($productorModel->name);
+            $fields = $productorModel->getProductorAsks();
+            //trace_log($fields);
+            $askFields = [
+                'askfield' => [
+                    'label' => 'Champs modificables',
+                    'usePanelStyles' => false,
+                    'type' => 'nestedform',
+                    'form' => [
+                        'fields' => $fields,
+                    ],
+
+                ]
+            ];
+            $formWidget->addFields($askFields);
+            $values = array_map(function ($item) {
+                return $item['default'];
+            }, $fields);
+            $formWidget->getField('askfield')->value =  $values;
+            return $formWidget;
+        } else {
+            return $formWidget;
+        }
+    }
+
+    // /**
+    //  * Envoyer un email
+    //  *
+    //  * @param string $template
+    //  * @param string $path
+    //  * @param array $vars
+    //  * @param Closure $callback
+    //  * @return string
+    //  */
+    // public static function sendToApi($template, $vars, $options, Closure $callback)
+    // {
+    //     if (!self::isMethodAllowed('sendToApi')) {
+    //         return null;
+    //     }
+    //     // Créer l'instance de pdf
+    //     // $creator = self::instanciateCreator($template, $vars, $options);
+    //     // // Appeler le callback pour définir les options
+    //     // $callback($creator);
+
+    //     // try {
+    //     //     return $creator->sendEmail();
+    //     // } catch (\Exception $ex) {
+    //     //     throw new \ApplicationException($ex);
+    //     // }
+    // }
+
+    // public static function show($template, $vars, $options, Closure $callback)
+    // {
+    //     if (!self::isMethodAllowed('show')) {
+    //         return null;
+    //     }
+    //     // Créer l'instance de pdf
+    //     $creator = self::instanciateCreator($template, $vars, $options);
+    //     // Appeler le callback pour définir les options
+    //     $callback($creator);
+    //     // Sauver le fichier pdf. 
+    //     try {
+    //         return $creator->show();
+    //     } catch (\Exception $ex) {
+    //         throw new \ApplicationException($ex);
+    //     }
+    // }
+
+    // public static function importData($template, $vars, $options,  Closure $callback)
+    // {
+    //     if (!self::isMethodAllowed('importData')) {
+    //         return null;
+    //     }
+    //     // Créer l'instance
+    //     $creator = self::instanciateCreator($template, $vars, $options);
+    //     // Appeler le callback pour définir les options
+    //     $callback($creator);
+    //     // Sauver le fichier. 
+    //     try {
+    //         return $creator->importData();
+    //     } catch (\Exception $ex) {
+    //         throw new \ApplicationException($ex);
+    //     }
+    // }
+
+    // public static function download($template, $vars, $options,  Closure $callback)
+    // {
+    //     if (!self::isMethodAllowed('download')) {
+    //         return null;
+    //     }
+    //     // Créer l'instance
+    //     $creator = self::instanciateCreator($template, $vars, $options);
+    //     // Appeler le callback pour définir les options
+    //     $callback($creator);
+    //     // Sauver le fichier. 
+    //     try {
+    //         return $creator->download();
+    //     } catch (\Exception $ex) {
+    //         throw new \ApplicationException($ex);
+    //     }
+    // }
 }

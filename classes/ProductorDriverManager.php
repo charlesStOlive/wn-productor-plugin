@@ -30,22 +30,26 @@ class ProductorDriverManager
         return $drivers;
     }
 
-    public function getAuthorisedDrivers($config, $user)
+    public function getAuthorisedDrivers($config, )
     {
         $drivers = [];
         $productorConfig = $config->productor;
+        if(!isset($productorConfig['drivers'])) {
+            throw new \ApplicationException('Il manque  dans productor->drivers dans config_waka');
+        }
         $modelClass = $config->modelClass;
         foreach($this->drivers as $driverKey=>$driver) {
             if(array_key_exists($driverKey, $productorConfig['drivers'])) {
                 $driverConfig = $productorConfig['drivers'][$driverKey];
+                $globalPermissions = $productorConfig['permissions'] ?? [];
                 $driverInstance = $driver(); // Ici vous instanciez le driver.
-                $productors = 
                 $drivers[$driverKey] = [
                     'config' => $driverInstance::getConfig(),
-                    'productors' => $driverInstance::getProductors($driverConfig, $modelClass, $user),
+                    'productors' => $driverInstance::getProductors($driverConfig, $globalPermissions),
                 ];
             }
         }
         return $drivers;
     }
+    
 }
