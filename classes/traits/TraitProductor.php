@@ -8,20 +8,6 @@ use Waka\Wutils\Classes\PermissionsChecker;
 
 trait TraitProductor
 {
-
-    /**
-     * Instancieation de la class creator
-     *
-     * @param string $url
-     * @return \Spatie\Browsershot\Browsershot
-     */
-    private static function instanciateCreator(string $templateCode, array $vars, array $options)
-    {
-        $productorClass = self::getConfig()['productorCreator'];
-        $class = new $productorClass($templateCode, $vars, $options);
-        return $class;
-    }
-
     public static function getProductor($slug)
     {
         $productorClass = self::getConfig()['productorModel'];
@@ -74,16 +60,6 @@ trait TraitProductor
         return $newArray;
     }
 
-    // private static function isMethodAllowed($methodName)
-    // {
-    //     $configMethods =  self::getConfig()['methods'];
-    //     if (in_array($methodName, $configMethods)) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
-
     private static function getAndSetAsks($productorModel, $formWidget)
     {
         if (method_exists(get_class($productorModel), 'getProductorAsks')) {
@@ -111,81 +87,4 @@ trait TraitProductor
             return $formWidget;
         }
     }
-
-    // /**
-    //  * Envoyer un email
-    //  *
-    //  * @param string $template
-    //  * @param string $path
-    //  * @param array $vars
-    //  * @param Closure $callback
-    //  * @return string
-    //  */
-    // public static function sendToApi($template, $vars, $options, Closure $callback)
-    // {
-    //     if (!self::isMethodAllowed('sendToApi')) {
-    //         return null;
-    //     }
-    //     // Créer l'instance de pdf
-    //     // $creator = self::instanciateCreator($template, $vars, $options);
-    //     // // Appeler le callback pour définir les options
-    //     // $callback($creator);
-
-    //     // try {
-    //     //     return $creator->sendEmail();
-    //     // } catch (\Exception $ex) {
-    //     //     throw new \ApplicationException($ex);
-    //     // }
-    // }
-
-    // public static function show($template, $vars, $options, Closure $callback)
-    // {
-    //     if (!self::isMethodAllowed('show')) {
-    //         return null;
-    //     }
-    //     // Créer l'instance de pdf
-    //     $creator = self::instanciateCreator($template, $vars, $options);
-    //     // Appeler le callback pour définir les options
-    //     $callback($creator);
-    //     // Sauver le fichier pdf. 
-    //     try {
-    //         return $creator->show();
-    //     } catch (\Exception $ex) {
-    //         throw new \ApplicationException($ex);
-    //     }
-    // }
-
-    // public static function importData($template, $vars, $options,  Closure $callback)
-    // {
-    //     if (!self::isMethodAllowed('importData')) {
-    //         return null;
-    //     }
-    //     // Créer l'instance
-    //     $creator = self::instanciateCreator($template, $vars, $options);
-    //     // Appeler le callback pour définir les options
-    //     $callback($creator);
-    //     // Sauver le fichier. 
-    //     try {
-    //         return $creator->importData();
-    //     } catch (\Exception $ex) {
-    //         throw new \ApplicationException($ex);
-    //     }
-    // }
-
-    // public static function download($template, $vars, $options,  Closure $callback)
-    // {
-    //     if (!self::isMethodAllowed('download')) {
-    //         return null;
-    //     }
-    //     // Créer l'instance
-    //     $creator = self::instanciateCreator($template, $vars, $options);
-    //     // Appeler le callback pour définir les options
-    //     $callback($creator);
-    //     // Sauver le fichier. 
-    //     try {
-    //         return $creator->download();
-    //     } catch (\Exception $ex) {
-    //         throw new \ApplicationException($ex);
-    //     }
-    // }
 }
