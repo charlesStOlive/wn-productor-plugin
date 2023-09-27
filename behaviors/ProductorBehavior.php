@@ -121,6 +121,7 @@ class ProductorBehavior extends ControllerBehavior
     public function onSelectProductor()
     {
         //trace_log(post());
+        trace_sql();
         $modelId = post('modelId');
         $driverCode = post('driverCode');
         $productorSlug = post('productorSlug');
@@ -131,26 +132,28 @@ class ProductorBehavior extends ControllerBehavior
             return $this->controller->{$productorSlug}();
         }
         $productorDriver = $this->driverManager->driver($driverCode);
-        $driverConfig = $productorDriver->getConfig();
         $dsMap = $this->getDsMapFromConfig($driverCode);
         //trace_log($dsMap);
         //
         $targetModel = $this->config->modelClass::find($modelId);
-        if ($driverConfig['use_import_file_widget'] ?? false) {
+        if ($productorDriver->getStaticConfig('use_import_file_widget') ?? false) {
             $this->productorWidget = $this->excelWidget;
         } else {
             $this->excelWidget = null;
-            $this->productorWidget = $this->createProductorWidget($driverConfig['productor_yaml_config'], $targetModel);
+            $this->productorWidget = $this->createProductorWidget($productorDriver->getStaticConfig('productor_yaml_config'), $targetModel);
             $this->productorWidget = $productorDriver::updateFormwidget($productorSlug, $this->productorWidget, $dsMap);
+            $this->productorWidget = $productorDriver::getDsAsks($this->productorWidget, $productorSlug);
             $configDsFields = $targetModel->dsGetParamsConfig($dsMap);
+            //trace_log('onSelectProductor',$configDsFields);
             if ($configDsFields) $this->productorWidget->addFields($configDsFields);
+            
         }
 
         $this->vars['driverCode'] = $driverCode;
         $this->vars['productorSlug'] = $productorSlug;
-        $this->vars['productorBtns'] = $driverConfig['methods'];
+        $this->vars['productorBtns'] = $productorDriver->getStaticConfig('methods');
         $this->vars['restartBtn'] = true;
-        $this->vars['productorLabel'] = $driverConfig['label'];
+        $this->vars['productorLabel'] = $productorDriver->getStaticConfig('label');
         $this->vars['productorWidget'] = $this->productorWidget;
         //
         return [
@@ -175,7 +178,6 @@ class ProductorBehavior extends ControllerBehavior
     public function onExecute()
     {
         //trace_log(\Input::all());
-        //trace_log(post());
         $driverCode = post('driverCode');
         $productorSlug = post('productorSlug');
         $productorHandler = post('handler');
@@ -185,11 +187,17 @@ class ProductorBehavior extends ControllerBehavior
         $dsMap = $this->getDsMapFromConfig($driverCode);
         //On récupère le driver
         $productorDriver = $this->driverManager->driver($driverCode);
-        $driverConfig = $productorDriver->getConfig();
+        $postData = post();
+        //trace_log('onExecute!',$postData);
+        if($asksData = $postData['productorDataArray']['prod_asks'] ?? false) {
+            $askData = Arr::keyBy($asksData, 'b_code');
+            $postData['prod_asks'] = $askData;
+            unset($postData['productorDataArray']['prod_asks']);
+        }
         //On ajoute toutes les données du formulaire ainsi que le modelClass ( autrees champs : modelId, reponseType, driverCode, etc.)
-        $allDatas = array_merge(post(), ['modelClass' => $this->config->modelClass, 'dsMap' => $dsMap]);
+        $allDatas = array_merge($postData, ['modelClass' => $this->config->modelClass, 'dsMap' => $dsMap]);
         //Si on utilise l'importateur de fichier on remplace les données par productorrArray();
-        if ($driverConfig['use_import_file_widget'] ?? false) {
+        if ($productorDriver->getStaticConfig('use_import_file_widget') ?? false) {
             //trace_log($this->excelWidget->getSaveData());
             $allDatas = array_merge($allDatas, ['productorDataArray' => $this->excelWidget->getSaveData()]);
         }

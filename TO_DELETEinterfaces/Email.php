@@ -3,7 +3,7 @@
 namespace Waka\Productor\Interfaces;
 use Closure;
 
-interface Email
+interface XXEmail
 {
 
     /**

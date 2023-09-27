@@ -3,7 +3,7 @@
 namespace Waka\Productor\Interfaces;
 use Closure;
 
-interface SaveTo
+interface XXSaveTo
 {
     public static function saveTo(string $slug, array $vars, array $options, string $path,  Closure $callback);
 }

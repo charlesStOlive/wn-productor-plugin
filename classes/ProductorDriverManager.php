@@ -25,7 +25,7 @@ class ProductorDriverManager
         $drivers = [];
         foreach($this->drivers as $driverKey=>$driver) {
             $driverInstance = $driver(); // Ici vous instanciez le driver.
-            $drivers[$driverKey] = $driverInstance::getConfig();
+            $drivers[$driverKey] = $driverInstance::getStaticConfig();
         }
         return $drivers;
     }
@@ -44,7 +44,7 @@ class ProductorDriverManager
                 $globalPermissions = $productorConfig['permissions'] ?? [];
                 $driverInstance = $driver(); // Ici vous instanciez le driver.
                 $drivers[$driverKey] = [
-                    'config' => $driverInstance::getConfig(),
+                    'config' => $driverInstance::getStaticConfig(),
                     'productors' => $driverInstance::getProductors($driverConfig, $globalPermissions),
                 ];
             }

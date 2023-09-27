@@ -1,0 +1,15 @@
+name: waka.productor::lang.blocks.ask_html.name
+description: waka.productor::lang.blocks.ask_html.description
+icon: icon-html5
+tags: ["asks"]
+fields:
+    b_code: 
+        label: Code 
+        required: true
+    content:
+        label: wcli.wcms::lang.blocks.richtext.content
+        span: full
+        type: wakaeditor                      
+==
+{{ content | raw }}
+

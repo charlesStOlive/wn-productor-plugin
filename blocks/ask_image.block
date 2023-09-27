@@ -1,0 +1,22 @@
+name: waka.productor::lang.blocks.ask_image.name
+description: waka.productor::lang.blocks.ask_image.description
+icon: icon-image
+tags: ["asks"]
+fields:
+    b_code: 
+        label: Code 
+        required: true
+    image:
+        label: wcli.wcms::lang.blocks.richtext.content
+        span: full
+        type: mediafinder  
+    width: 
+        label: Width 
+        span: left 
+        default: 600
+    height:   
+        label: Height 
+        span: right 
+        default: 300                      
+==
+{{ content | raw }}

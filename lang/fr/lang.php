@@ -23,5 +23,15 @@ return [
     ],
     'popup_creator' => [
         'placeholder_model' => 'Choisissez un modèle'
+    ],
+    'blocks' => [
+        'ask_html' => [
+            'name' => 'Html',
+            'description' => 'Variable html'
+        ],
+        'ask_image' => [
+            'name' => 'Image',
+            'description' => 'Variable image'
+        ]
     ]
 ];

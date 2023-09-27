@@ -46,6 +46,17 @@ class Plugin extends PluginBase
     }
 
     /**
+     * Registers the custom Blocks provided by this plugin
+     */
+    public function registerBlocks(): array
+    {
+        return [
+            'asks_html' => '$/waka/productor/blocks/ask_html.block',
+            'ask_images' => '$/waka/productor/blocks/ask_image.block',
+        ];
+    }
+
+    /**
      * Registers any frontend components implemented in this plugin.
      */
     public function registerComponents(): array

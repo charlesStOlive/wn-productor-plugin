@@ -3,7 +3,7 @@
 namespace Waka\Productor\Interfaces;
 use Closure;
 
-interface BaseProductor
+interface XXBaseProductor
 {
 
     public static function getConfig();
