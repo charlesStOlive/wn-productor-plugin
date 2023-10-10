@@ -8,10 +8,19 @@
     <div class="modal-body">
         <input id="modelId" name="modelId" type="hidden" value="<?= $modelId ?>">
         <div id="productorWidget">
+            <?php if ($countCheck) : ?>
+                <div class="callout fade in callout-success">
+                    <div class="header">
+                        <i class="icon-check"></i>
+                        <h3>Des cases sont cochés</h3>
+                        <p>Si et seulement si le module d'export est compatible avec les cases à cochées, celles ci seront prise en compte lors de l'execution du module</p>
+                    </div>
+                </div>
+            <?php endif ?>
             <div class="form-group">
                 <div class="custom-select" id="driverCode">
                     <?php foreach ($drivers as $driverkey => $value) :
-                        $productors = $value['productorModels'] ?? [];
+                        $productors = $value['productorModels'];
                         if (count($productors)) : ?>
                             <div class="optgroup">
                                 <div class="wn-<?=$value['icon']?> label"><?= $value['label'] ?></div>
@@ -27,7 +36,7 @@
                                                 <?= $value['name'] ?>
                                             </button>
                                         <?php else : ?>
-                                            <button class="option" data-request="onSelectProductor" data-request-data="driverCode:'<?= $driverkey ?>',productorSlug:'<?= $productorKey ?>',addedConfig:'<?=e(json_encode($value))?>'" data-request-loading="#wakaLoading2">
+                                            <button class="option" data-request="onSelectProductorIndex" data-request-data="driverCode:'<?= $driverkey ?>',productorSlug:'<?= $productorKey ?>',addedConfig:'<?=e(json_encode($value))?>'" data-request-loading="#wakaLoading2">
                                                 <?= $value['name'] ?>
                                             </button>
                                         <?php endif ?>
@@ -54,7 +63,7 @@
     <div class="modal-footer m-t">
         <div class="loading-indicator-container">
             <div id="productorModalBtns">
-                <?= $this->makePartial('~/plugins/waka/productor/behaviors/productorbehavior/partials/_btns.htm') ?>
+                <?= $this->makePartial('~/plugins/waka/productor/behaviors/productorindexbehavior/partials/_btns.htm') ?>
             </div>
         </div>
     </div>

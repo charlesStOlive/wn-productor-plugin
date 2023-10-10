@@ -5,6 +5,7 @@ namespace Waka\Productor\Classes\Abstracts;
 use System\Classes\PluginManager;
 
 use Arr;
+use Waka\Productor\Classes\CheckAcceptedModel;
 use Waka\Wutils\Classes\PermissionsChecker;
 
 abstract class BaseProductor
@@ -35,7 +36,8 @@ abstract class BaseProductor
     protected function getBaseVars($allDatas , $dsMapKey = null) {
         $this->modelId = Arr::get($allDatas, 'modelId');
         $this->modelClass = Arr::get($allDatas, 'modelClass');
-        $this->dsMap = $dsMapKey ?: Arr::get($allDatas, 'dsMap', null);
+        $this->dsMap = $dsMapKey ?: Arr::get($allDatas, 'config.dsMap', null);
+        //trace_log($this->dsMap);
         $this->prodAsks = Arr::get($allDatas, 'prod_asks', []);
         $this->dsParams = Arr::get($allDatas, 'productorDataArray.ds_map_config', []);
         if($this->dsParams) {
@@ -49,6 +51,10 @@ abstract class BaseProductor
         $this->targetModel = $this->modelClass::find($this->modelId);
         if ($this->targetModel) {
             $this->data = array_merge($this->data, $this->targetModel->dsMap($this->dsMap, $this->dsParams));
+            //trace_log($this->data);
+        } else {
+            //Excel n a pas de tragetproductor par ex. 
+            //throw new \ApplicationException('probleme targetModel');
         }
     }
 
@@ -57,42 +63,52 @@ abstract class BaseProductor
     public static function getProductor($slug)
     {
         $productorClass = self::getStaticConfig('productorModel');
+        // trace_log($productorClass);
         if (method_exists($productorClass, 'findBySlug')) {
-            //trace_log('find by clug existe************');
+            // trace_log('find by clug existe************');
             return $productorClass::findBySlug($slug);
+        } else if(self::getStaticConfig('noProductorBdd')) {
+            //Il ny a pas de modèle dans la bdd on retourne vide, notamement pour les dsAsks
+            return null;
         } else {
-            //trace_log('find by clug existe PAS ************');
+            // trace_log('find by clug existe PAS ************');
             //trace_log($productorClass);
             return $productorClass::where('slug', $slug)->first();
         }
     }
 
-    public static function getProductors($driverConfig, $globalPermissions = [])
+    public static function getModels($modelKey, $modelConfig)
     {
-        //trace_log('driverConfig!', $driverConfig);
-        //trace_log('globalPermissions', $globalPermissions);
-        $pc = new PermissionsChecker();
-        $globalPermissions = $globalPermissions;
-        $pc->mergeRules($globalPermissions);
-        $driverPermissions = $driverConfig['permissions'] ?? [];
-        $pc->mergeRules($driverPermissions);
-        // Recherche dans les fichiers enregistrés.
-        $staticTemplatesList = [];
+        $modelAccepted = new CheckAcceptedModel($modelKey);
         if ($registrerFnc = self::getStaticConfig('productorFilesRegistration') ?? false) {
             $templatesData = PluginManager::instance()->getRegistrationMethodValues($registrerFnc);
             $templatesData = self::flattenPluginBundle($templatesData);
-            $pc->mergeKeyedRules($templatesData);
+            //trace_log($templatesData);
+            $modelAccepted->addModels($templatesData);
         }
-        $noProductodBdd = self::getStaticConfig('noproductorBdd') ?? false;
-        if (!$noProductodBdd) {
+        $noProductorBdd = self::getStaticConfig('noProductorBdd') ?? false;
+        //trace_log($noProductorBdd);
+        if (!$noProductorBdd) {
+            //trace_log('recherche----------------');
             $productorModel = self::getStaticConfig('productorModel');
             // Filtre sur les permissions
             $bddTemplatesList = $productorModel::get(['name', 'slug'])->keyBy('slug')->toArray();
-            $pc->mergeKeyedRules($bddTemplatesList);
+            //trace_log($bddTemplatesList);
+            $modelAccepted->addModels($bddTemplatesList);
         }
-        $autorisedTemplates = $pc->checkKeyedCodes();
+        $autorisedTemplates = $modelAccepted->check();
+        foreach($autorisedTemplates as $key=>$template) {
+            if($template['class'] ?? false) {
+                $template['class'] = addslashes($template['class']);
+            }
+            $autorisedTemplates[$key] = array_merge($template, $modelConfig);
+        }
         return $autorisedTemplates;
     }
+
+    
+
+    
 
     private static function flattenPluginBundle($array)
     {
@@ -109,7 +125,17 @@ abstract class BaseProductor
     public static function getDsAsks($formWidget, $slug)
     {
         $productorModel = self::getProductor($slug);
-        $fields = $productorModel->prod_asks;
+        if(!$productorModel) {
+            return $formWidget;
+        }
+        //
+        $fields = null;
+        if(is_array($productorModel)) {
+            //cas des excel qui ont une config en excel
+            $fields = $productorModel['prod_asks'] ?? null;
+        } else {
+            $fields = $productorModel->prod_asks ?? null ;
+        }
         //trace_log($fields);
         if (!$fields) {
             return $formWidget;

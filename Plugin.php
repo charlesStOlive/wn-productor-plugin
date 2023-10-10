@@ -4,6 +4,7 @@ use Backend;
 use Backend\Models\UserRole;
 use System\Classes\PluginBase;
 use Waka\Productor\Classes\ProductorDriverManager;
+use App;
 
 /**
  * Productor Plugin Information File
@@ -33,6 +34,11 @@ class Plugin extends PluginBase
     {
         $this->app->singleton('waka.productor.drivermanager', function ($app) {
             return new ProductorDriverManager;
+        });
+
+        $driverManager = App::make('waka.productor.drivermanager');
+        $driverManager->registerDriver('mailer', function () {
+            return new \Waka\Productor\Classes\Mailer();
         });
 
     }
@@ -74,14 +80,6 @@ class Plugin extends PluginBase
     public function registerPermissions(): array
     {
         return []; // Remove this line to activate
-
-        return [
-            'waka.productor.some_permission' => [
-                'tab' => 'waka.productor::lang.plugin.name',
-                'label' => 'waka.productor::lang.permissions.some_permission',
-                'roles' => [UserRole::CODE_DEVELOPER, UserRole::CODE_PUBLISHER],
-            ],
-        ];
     }
 
     /**

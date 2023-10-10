@@ -30,7 +30,7 @@ modelClass: Wcli\Crm\Models\Client
 backendUrl: wcli/crm/clients
 
 productor:
-    permissions: wcli.tarificateur::*.projet.*
+    models: wcli.tarificateur::*.projet.*
     drivers: 
         mjmler: 
         # pdfer:
@@ -42,7 +42,7 @@ productor:
 ```
 ```yaml
 productor:
-    permissions: # des permissions utilisation de wildcard possible ex : wcli.tarificateur::*.projet.*
+    models: # des permissions utilisation de wildcard possible ex : wcli.tarificateur::*.projet.*
     drivers: # liste des drivers
         mjmler: # le code du driver voir référencer un driver
           dsMap: full # le dsMap si existe voir la partie dsMap

@@ -26,18 +26,24 @@
     font-weight: bold;
 }
 
-#driverCode .optgroup-label {
-    width: 30%;
-    font-size: 12px;
+#driverCode .label {
     text-transform: uppercase;
+}
+
+#driverCode .optgroup {
+    width: 30%;
+    background-color: gainsboro;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+
     color: #35425b;
-    margin: 0;
-    padding-bottom: 1em;
 }
 
 /* Ajouter la Media Query pour les appareils mobiles */
 @media screen and (max-width: 768px) {
-    #driverCode .optgroup-label {
+    #driverCode .optgroup {
         width: 100%;
     }
 }

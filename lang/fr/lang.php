@@ -5,33 +5,35 @@ return [
         'popup' => [
             'btn' => [
                 'close' => 'Fermer',
-                'createPath' => 'Creer un lien',
-                'download' => 'Télecharger',
-                'openPath' => 'Ouvrir',
-                'productorPath' => 'Télecharger le fichier',
-                'show' => 'Voir'
             ],
-            'create' => 'Produire un élement'
-        ]
-    ],
-    'permissions' => [
-        'some_permission' => 'Some permission'
+            'create' => 'Produire un élément',
+        ],
     ],
     'plugin' => [
-        'description' => 'No description provided yet...',
-        'name' => 'Productor'
+        'description' => 'Aucune description fournie pour le moment...',
+        'name' => 'Productor',
     ],
-    'popup_creator' => [
-        'placeholder_model' => 'Choisissez un modèle'
+    'driver' => [
+        'mailer' => [
+            'label' => 'Mail (natif)',
+            'description' => 'Envoie un email natif',
+        ],
+    ],
+    'drivers' => [
+        'success_label' => [
+            'close_download' => 'Télécharger le fichier',
+            'open_link' => 'Ouvrir le lien',
+            'close_refresh' => 'Fermer et rafraîchir',
+        ],
     ],
     'blocks' => [
         'ask_html' => [
-            'name' => 'Html',
-            'description' => 'Variable html'
+            'name' => 'HTML',
+            'description' => 'Permet de modifier du contenu HTML',
         ],
         'ask_image' => [
             'name' => 'Image',
-            'description' => 'Variable image'
-        ]
-    ]
+            'description' => 'Permet de modifier une image',
+        ],
+    ],
 ];

@@ -1,0 +1,9 @@
+fields: 
+    tos: 
+        label: Emails
+        type: taglist
+        mode: array
+        options: getEmails
+
+    subject:
+        label: Sujet

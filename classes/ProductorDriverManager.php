@@ -1,4 +1,6 @@
-<?php namespace Waka\Productor\Classes;
+<?php
+
+namespace Waka\Productor\Classes;
 
 class ProductorDriverManager
 {
@@ -23,33 +25,82 @@ class ProductorDriverManager
     public function getAllDrivers()
     {
         $drivers = [];
-        foreach($this->drivers as $driverKey=>$driver) {
+        foreach ($this->drivers as $driverKey => $driver) {
             $driverInstance = $driver(); // Ici vous instanciez le driver.
             $drivers[$driverKey] = $driverInstance::getStaticConfig();
         }
         return $drivers;
     }
 
-    public function getAuthorisedDrivers($config, )
+    public function getAuthorisedDrivers($config, $forIndex = false)
     {
         $drivers = [];
-        $productorConfig = $config->productor;
-        if(!isset($productorConfig['drivers'])) {
-            throw new \ApplicationException('Il manque  dans productor->drivers dans config_waka');
+        $productorConfig = null;
+        if ($forIndex) {
+            $productorconfig = $config->productorIndex;
+        } else {
+            $productorconfig = $config->productor;
         }
-        $modelClass = $config->modelClass;
-        foreach($this->drivers as $driverKey=>$driver) {
-            if(array_key_exists($driverKey, $productorConfig['drivers'])) {
-                $driverConfig = $productorConfig['drivers'][$driverKey];
-                $globalPermissions = $productorConfig['permissions'] ?? [];
-                $driverInstance = $driver(); // Ici vous instanciez le driver.
-                $drivers[$driverKey] = [
-                    'config' => $driverInstance::getStaticConfig(),
-                    'productors' => $driverInstance::getProductors($driverConfig, $globalPermissions),
+        $globalDsMap = $config->dsMap ?? null;
+        $productorModels = $productorconfig['models'] ?? null;
+        //
+        foreach ($productorModels as $modelsKey => $modelsConfig) {
+            if(!$modelsConfig) $modelsConfig = [];
+            $modelsDsMap = $modelsConfig['dsMap'] ?? null;
+            if($globalDsMap && ! $modelsDsMap) {
+                $modelsDsMap = $globalDsMap;
+            }
+            $driverReceived = $this->getModelsFromDrivers($modelsKey, $modelsConfig);
+            $driverKeyReceived = array_key_first($driverReceived);
+            if ($drivers[$driverKeyReceived] ?? false) {
+                //Le driver a déjà été importé par un autre modèle nous mergons recursivement uniquement les infos de modes. 
+                $drivers[$driverKeyReceived]['productorModels'] = array_merge($drivers[$driverKeyReceived]['productorModels'], $driverReceived[$driverKeyReceived]['productorModels']);
+            } else {
+                $drivers = array_merge($drivers, $driverReceived);
+            }
+        }
+        // trace_log($drivers);
+        return $drivers;
+    }
+
+    private function getModelsFromDrivers($modelsKey, $modelsConfig)
+    {
+        $driversToReturn = [];
+        $allDrivers = [];
+        
+        $specificDrivers = $modelsConfig['drivers'] ?? null;
+        $specificDrivers = trim($specificDrivers);
+        //trace_log('specificDrivers : '.$specificDrivers, !empty($specificDrivers));
+        if($specificDrivers && !is_array($specificDrivers)) {
+            $specificDrivers = explode(',',$specificDrivers);
+        }
+        //trace_log("$modelsKey",$specificDrivers);
+        if ($specificDrivers) {
+            foreach ($this->drivers as $key => $driver) {
+                // trace_log('key : '.$key, $specificDrivers);
+                //Recherche si la clef existe dans les clefs de config de drivers. 
+                if (in_array($key, $specificDrivers)) {
+                    // trace_log('cette clef existe : '.$key);
+                    $allDrivers[$key] = $driver;
+                } else {
+                    // trace_log('cette clef existe PAS : '.$key);
+                }
+            }
+        } else {
+            $allDrivers = $this->drivers;
+        }
+        foreach ($allDrivers as $driverKey => $driver) {
+            $driverInstance = $driver(); // Ici vous instanciez le driver.
+            //trace_log('driverKey', $driverKey);
+            $models =  $driverInstance::getModels($modelsKey, $modelsConfig);
+            if (!empty($models)) {
+                $config = $driverInstance::getStaticConfig();
+                $driversToReturn[$driverKey] = [
+                    'config' => $config,
+                    'productorModels' => $models,
                 ];
             }
         }
-        return $drivers;
+        return $driversToReturn;
     }
-    
 }

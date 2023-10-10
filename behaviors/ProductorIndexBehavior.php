@@ -10,14 +10,14 @@ use Event;
 use ValidationException;
 use ApplicationException;
 
-class ProductorBehavior extends ControllerBehavior
+class ProductorIndexBehavior extends ControllerBehavior
 {
     /**
      * @var array Configuration values that must exist when applying the primary config file.
      * - modelClass: Class name for the model
      * - form: Form field definitions
      */
-    protected $requiredConfig = ['modelClass', 'backendUrl', 'productor'];
+    protected $requiredConfig = ['modelClass', 'backendUrl', 'productorIndex'];
 
     /**
      * @var mixed Configuration for this behaviour
@@ -74,78 +74,60 @@ class ProductorBehavior extends ControllerBehavior
         Event::listen('waka.productor::conditions.error', function ($error) {
             array_push($this->errors, $error);
         });
-        Event::listen('waka_controller.action_bar.before_partial', function ($params) {
-            if ($params->context == 'update' && $this->hasData()) return $this->makePartial('controller_btn');
+        Event::listen('waka_controller.index_bar.after_partial', function () {
+            if($this->hasData()) {
+                return $this->makePartial('controller_btn');
+            }
+            
         });
         $this->driverManager = App::make('waka.productor.drivermanager');
         //
         $this->excelWidget = $this->createFileImportWidget();
     }
 
-    public function hasData()
-    {
-        $models = $this->config->productor['models'] ?? false;
-        $handlers = $this->config->productor['handlers'] ?? false;
+    public function hasData() {
+        $models = $this->config->productorIndex['models'] ?? false;
+        $handlers = $this->config->productorIndex['handlers'] ?? false;
         return $models || $handlers;
+
     }
 
-    public function onLauchProductor()
+    public function onLauchProductorIndex()
     {
-        $configProductor = $this->controller->updateProductorConfig($this->config->productor);
+        $checkedIds = post('checked', []);
+        $countCheck = count($checkedIds);
+        \Session::put('waka.productor.productorindex.checkedIds', $checkedIds);
+        //
+        $configProductor = $this->controller->updateProductorIndexConfig($this->config->productorIndex);
         if (!empty($configProductor)) {
-            $this->config->productor = $configProductor;
+            $this->config->productorIndex = $configProductor;
         }
-        $drivers = $this->driverManager->getAuthorisedDrivers($this->config);
-
-
-
+        $drivers = $this->driverManager->getAuthorisedDrivers($this->config, true);
         $drivers = Arr::map($drivers, function ($value, $driverKey) {
             $label = Arr::get($value, 'config.label');
             $icon = Arr::get($value, 'config.icon');
             $data = Arr::get($value, 'productorModels');
-            //trace_log($data);
             return [
                 'label' => $label,
                 'icon' => $icon,
                 'productorModels' => $data
             ];
         });
-        // trace_log($drivers);
         $manualHandlers = $this->getManualHandlers();
-        //trace_log($manualHandlers);
         if (!empty($manualHandlers)) {
             $drivers['handlers'] = $manualHandlers;
         }
         //trace_log($drivers);
+        $this->vars['countCheck'] = $countCheck;
         $this->vars['modelId'] = post('modelId');
         $this->vars['drivers'] = $drivers;
         return $this->makePartial('popup');
     }
 
-    protected function getManualHandlers()
-    {
-        $handlers = $this->config->productor['handlers'] ?? null;
-        if (!$handlers) {
-            return;
-        }
-        //trace_log($handlers);
-        return [
-            'label' =>  $handlers['label'] ?? 'Autre opération',
-            'icon' => 'icon-cog',
-            'productorModels' => $handlers['requests']
-        ];
-    }
+    
 
-    public function updateProductorConfig($productorConfig)
+    public function onSelectProductorIndex()
     {
-        return $productorConfig;
-    }
-
-    public function onSelectProductor()
-    {
-        //trace_log(post());
-        //trace_sql();
-        $modelId = post('modelId');
         $driverCode = post('driverCode');
         $productorSlug = post('productorSlug');
         //
@@ -156,21 +138,14 @@ class ProductorBehavior extends ControllerBehavior
         }
         $productorDriver = $this->driverManager->driver($driverCode);
         $additionalConfig = $this->getAdditionalConfig(post('addedConfig'));
-        //trace_log('$additionalConfig 1 ',$additionalConfig);
-        $dsMap = $additionalConfig['dsMap'] ?? false;
-        //trace_log('onSelectProductor',$dsMap);
-        //
-        $targetModel = $this->config->modelClass::find($modelId);
+        //trace_log($dsMap);
         if ($productorDriver->getStaticConfig('use_import_file_widget') ?? false) {
             $this->productorWidget = $this->excelWidget;
         } else {
             $this->excelWidget = null;
-            $this->productorWidget = $this->createProductorWidget($productorDriver->getStaticConfig('productor_yaml_config'), $targetModel);
-            $this->productorWidget = $productorDriver::updateFormwidget($productorSlug, $this->productorWidget, $additionalConfig);
-            $this->productorWidget = $productorDriver::getDsAsks($this->productorWidget, $productorSlug);
-            $configDsFields = $targetModel->dsGetParamsConfig($dsMap);
-            //trace_log('onSelectProductor',$configDsFields);
-            if ($configDsFields) $this->productorWidget->addFields($configDsFields);
+            $this->productorWidget = $this->createProductorWidget($productorDriver->getStaticConfig('productor_yaml_config'));
+            $this->productorWidget = $productorDriver::updateFormwidget($productorSlug, $this->productorWidget,$additionalConfig);
+            
         }
 
         $this->vars['addedConfig'] = post('addedConfig');
@@ -190,64 +165,68 @@ class ProductorBehavior extends ControllerBehavior
         //$vars = $this->controller->ChangeVarsAfter($model, $productor);
     }
 
+    protected function getManualHandlers()
+    {
+        return $this->config->productorIndex['handlers'] ?? [];
+    }
+
+    public function updateProductorIndexConfig($productorIndexConfig)
+    {
+        return $productorIndexConfig;
+    }
+
     private function getAdditionalConfig($jsonData)
     {
-        if (is_string($jsonData)) {
+        if(is_string($jsonData)) {
             $decrypted = json_decode(html_entity_decode($jsonData), true);
             //trace_log('json error !!', json_last_error_msg());
             return $decrypted;
         } else {
             return [];
         }
+        
     }
 
-    public function onExecute()
+    public function onIndexExecute()
     {
         //trace_log(\Input::all());
-
         $driverCode = post('driverCode');
         $productorSlug = post('productorSlug');
         $productorHandler = post('handler');
-
         //
-        $configProductor = $this->controller->updateProductorConfig($this->config->productor);
-        //trace_log('configProductor!',$configProductor);
-
+        $configProductor = $this->controller->updateProductorIndexConfig($this->config->productorIndex);
         $additionalConfig = $this->getAdditionalConfig(post('addedConfig'));
-        //trace_log('$additionalConfig 2 ',$additionalConfig);
-        //trace_log('onSelectProductor',$dsMap);
         //On récupère le driver
         $productorDriver = $this->driverManager->driver($driverCode);
         $postData = post();
-        unset($postData['addedConfig']);
         //trace_log('onExecute!',$postData);
-        if ($asksData = $postData['productorDataArray']['prod_asks'] ?? false) {
+        if($asksData = $postData['productorDataArray']['prod_asks'] ?? false) {
             $askData = Arr::keyBy($asksData, 'b_code');
             $postData['prod_asks'] = $askData;
             unset($postData['productorDataArray']['prod_asks']);
         }
         //On ajoute toutes les données du formulaire ainsi que le modelClass ( autrees champs : modelId, reponseType, driverCode, etc.)
-        $allDatas = array_merge($postData,  ['config' => $additionalConfig, 'modelClass' => $this->config->modelClass]);
+        $allDatas = array_merge($postData, ['config' => $additionalConfig, 'modelClass' => $this->config->modelClass]);
         //Si on utilise l'importateur de fichier on remplace les données par productorrArray();
         if ($productorDriver->getStaticConfig('use_import_file_widget') ?? false) {
             //trace_log($this->excelWidget->getSaveData());
-            $allDatas = array_merge($allDatas,  ['config' => $additionalConfig, 'productorDataArray' => $this->excelWidget->getSaveData()]);
+            $allDatas = array_merge($allDatas, ['productorDataArray' => $this->excelWidget->getSaveData()]);
         }
         try {
             $result = $productorDriver->execute($productorSlug, $productorHandler, $allDatas);
             //trace_log('success----------------------------');
-            return $this->handleProductorSuccess($result);
+            return $this->handleProductorIndexSuccess($result);
         } catch (ValidationException $ex) {
             //trace_log('ValidationException---------------', $ex);
             throw  $ex;
         } catch (\Exception $ex) {
             //trace_log('Exception-------------------------');
             \Log::error($ex);
-            return $this->handleProductorError($ex, 500);
+            return $this->handleProductorIndexError($ex, 500);
         }
     }
 
-    private function handleProductorError($ex)
+    private function handleProductorIndexError($ex)
     {
         $this->vars['btns'] = [];
         $this->vars['restartBtn'] = true;
@@ -258,38 +237,31 @@ class ProductorBehavior extends ControllerBehavior
         ];
     }
 
-    private function handleProductorSuccess($successData)
+    private function handleProductorIndexSuccess($successData)
     {
-        trace_log($successData);
+        //trace_log($successData);
         $this->vars['btns'] = [];
         $this->vars['content'] = [];
         $this->vars['restartBtn'] = true;
         $this->vars['message'] = $successData['message'] ?? 'Processus Terminé';
-
         if ($closeBtn = $successData['btn'] ?? false) {
             $link = $closeBtn['link'] ?? null;
             if ($link) {
                 $closeBtn['link'] =  \Crypt::encrypt($link);;
             }
             $this->vars['closeBtn'] = $closeBtn;
+            return [
+                '#productorWidget' => $this->makePartial('success'),
+                '#productorModalBtns' => $this->makePartial('btns'),
+                '#extraContent' => $this->makePartial('content'),
+            ];
         }
         if ($partial = $successData['partial'] ?? false) {
             $this->vars['content'] = $partial;
+            return [
+                '#extraContent' => $this->makePartial('content'),
+            ];
         }
-        $partialsUpdate = [
-            '#productorWidget' => $this->makePartial('success'),
-            '#productorModalBtns' => $this->makePartial('btns'),
-            '#extraContent' => $this->makePartial('content'),
-        ];
-        if($successData['keep_btns'] ?? false) {
-            //Si on doit conserver les boutons on  supprime le partial des boutons de la maj 
-            unset($partialsUpdate['#productorModalBtns']);
-        }
-        if($successData['keep_form'] ?? false) {
-            //Si on doit conserver les boutons on  supprime le partial des boutons de la maj 
-            unset($partialsUpdate['#productorWidget']);
-        }
-        return $partialsUpdate;
     }
 
     public function onCloseAndDownload()
@@ -337,12 +309,12 @@ class ProductorBehavior extends ControllerBehavior
         return $widget;
     }
 
-    public function createProductorWidget($configYaml, $targetModel)
+    public function createProductorWidget($configYaml)
     {
         $config = $this->makeConfig($configYaml);
         $config->alias = 'productorData';
         $config->arrayName = 'productorDataArray';
-        $config->model = $targetModel;
+        $config->model = new \Waka\MaatExcel\Models\ExportExcel();
         $widget = $this->makeWidget('Backend\Widgets\Form', $config);
         $widget->bindToController();
         return $widget;
