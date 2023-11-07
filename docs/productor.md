@@ -5,7 +5,7 @@ Ce plugin permet de lier des modèles de production avec des modèles et des con
 Ce plugin va installer s'ils n'existent pas encore waka/wn-ds-plugin et waka/wn-wutils-plugin.
 
 ```
-composer require waka/wn-ds-plugin
+composer require waka/wn-productor-plugin
 ```
 
 
@@ -25,26 +25,17 @@ class MaClasse extends Controller
 ``` 
 1. Créer/Mettre a jours le fichier config_waka dans le dossier liée au controller :  vendor/plugin/controller/maclasse/config_waka.yaml
 2. ajouter une config  productor ( et modelClass + backendUrl) si vous créez le fichier
-```yaml
+```
 modelClass: Wcli\Crm\Models\Client
 backendUrl: wcli/crm/clients
 
 productor:
     models: 
         wcli.tarificateur::*.projet.*:
-            drivers: mjmler,worder
+            # drivers: mjmler,worder
+            # dsMap: main
         excelerRelationExporter:
         excelerRelationImporter:
-```
-```yaml
-productor:
-    models: # des permissions utilisation de wildcard possible ex : wcli.tarificateur::*.projet.*
-    drivers: # liste des drivers
-        mjmler: # le code du driver voir référencer un driver
-          dsMap: full # le dsMap si existe voir la partie dsMap
-          permissions: #Permission spécifique
-        # otherDriver: 
-        #     dsMap: 
 ```
 
 ## Création d'un driver 

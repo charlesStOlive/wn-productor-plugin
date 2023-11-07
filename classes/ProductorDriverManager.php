@@ -35,14 +35,10 @@ class ProductorDriverManager
     public function getAuthorisedDrivers($config, $forIndex = false)
     {
         $drivers = [];
-        $productorConfig = null;
-        if ($forIndex) {
-            $productorconfig = $config->productorIndex;
-        } else {
-            $productorconfig = $config->productor;
-        }
+        $productorConfig = [];
+        $productorconfig = $config->productor ?? [];
         $globalDsMap = $config->dsMap ?? null;
-        $productorModels = $productorconfig['models'] ?? null;
+        $productorModels = $productorconfig['models'] ?? [];
         //
         foreach ($productorModels as $modelsKey => $modelsConfig) {
             if(!$modelsConfig) $modelsConfig = [];

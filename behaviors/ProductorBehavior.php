@@ -91,10 +91,21 @@ class ProductorBehavior extends ControllerBehavior
 
     public function onLauchProductor()
     {
-        $configProductor = $this->controller->updateProductorConfig($this->config->productor);
-        if (!empty($configProductor)) {
-            $this->config->productor = $configProductor;
+        $targetModel = $this->config->modelClass::find(post('modelId'));
+        $configFromWorkflow = Event::fire('controller.productor.update_productor', [$targetModel]);
+        if ($configFromWorkflow = $configFromWorkflow[0] ?? false) {
+            if (array_key_exists('productor', $configFromWorkflow)) {
+                $workflowConfig = $configFromWorkflow['productor'];
+                if(!$workflowConfig) $workflowConfig = [];
+                //trace_log($workflowConfig);
+                $this->config->productor = $workflowConfig;
+            } 
         }
+        
+        // $configProductor = $this->controller->updateProductorConfig($this->config->productor);
+        // if (!empty($configProductor)) {
+        //     $this->config->productor = $configProductor;
+        // }
         $drivers = $this->driverManager->getAuthorisedDrivers($this->config);
 
 
@@ -136,10 +147,10 @@ class ProductorBehavior extends ControllerBehavior
         ];
     }
 
-    public function updateProductorConfig($productorConfig)
-    {
-        return $productorConfig;
-    }
+    // public function updateProductorConfig($productorConfig)
+    // {
+    //     return $productorConfig;
+    // }
 
     public function onSelectProductor()
     {
@@ -210,7 +221,7 @@ class ProductorBehavior extends ControllerBehavior
         $productorHandler = post('handler');
 
         //
-        $configProductor = $this->controller->updateProductorConfig($this->config->productor);
+        // $configProductor = $this->controller->updateProductorConfig($this->config->productor);
         //trace_log('configProductor!',$configProductor);
 
         $additionalConfig = $this->getAdditionalConfig(post('addedConfig'));
@@ -260,7 +271,7 @@ class ProductorBehavior extends ControllerBehavior
 
     private function handleProductorSuccess($successData)
     {
-        trace_log($successData);
+        //trace_log($successData);
         $this->vars['btns'] = [];
         $this->vars['content'] = [];
         $this->vars['restartBtn'] = true;
@@ -281,11 +292,11 @@ class ProductorBehavior extends ControllerBehavior
             '#productorModalBtns' => $this->makePartial('btns'),
             '#extraContent' => $this->makePartial('content'),
         ];
-        if($successData['keep_btns'] ?? false) {
+        if ($successData['keep_btns'] ?? false) {
             //Si on doit conserver les boutons on  supprime le partial des boutons de la maj 
             unset($partialsUpdate['#productorModalBtns']);
         }
-        if($successData['keep_form'] ?? false) {
+        if ($successData['keep_form'] ?? false) {
             //Si on doit conserver les boutons on  supprime le partial des boutons de la maj 
             unset($partialsUpdate['#productorWidget']);
         }

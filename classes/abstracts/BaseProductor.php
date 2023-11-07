@@ -80,12 +80,7 @@ abstract class BaseProductor
     public static function getModels($modelKey, $modelConfig)
     {
         $modelAccepted = new CheckAcceptedModel($modelKey);
-        if ($registrerFnc = self::getStaticConfig('productorFilesRegistration') ?? false) {
-            $templatesData = PluginManager::instance()->getRegistrationMethodValues($registrerFnc);
-            $templatesData = self::flattenPluginBundle($templatesData);
-            //trace_log($templatesData);
-            $modelAccepted->addModels($templatesData);
-        }
+        
         $noProductorBdd = self::getStaticConfig('noProductorBdd') ?? false;
         //trace_log($noProductorBdd);
         if (!$noProductorBdd) {
@@ -95,6 +90,12 @@ abstract class BaseProductor
             $bddTemplatesList = $productorModel::get(['name', 'slug'])->keyBy('slug')->toArray();
             //trace_log($bddTemplatesList);
             $modelAccepted->addModels($bddTemplatesList);
+        }
+        if ($registrerFnc = self::getStaticConfig('productorFilesRegistration') ?? false) {
+            $templatesData = PluginManager::instance()->getRegistrationMethodValues($registrerFnc);
+            $templatesData = self::flattenPluginBundle($templatesData);
+            //trace_log($templatesData);
+            $modelAccepted->addModels($templatesData);
         }
         $autorisedTemplates = $modelAccepted->check();
         foreach($autorisedTemplates as $key=>$template) {

@@ -1,0 +1,8 @@
+files:
+    productor:
+        title: Module Productor
+        category_slug: "modules"
+        comment: "Production élements dans controller"
+        permission: waka.docser.modules
+        relativePath: waka/productor/docs
+        sort_order: 1000
