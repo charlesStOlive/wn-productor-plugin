@@ -47,6 +47,7 @@ class ProductorDriverManager
                 $modelsDsMap = $globalDsMap;
             }
             $driverReceived = $this->getModelsFromDrivers($modelsKey, $modelsConfig);
+            trace_log('driverReceived!!', $driverReceived);
             $driverKeyReceived = array_key_first($driverReceived);
             if ($drivers[$driverKeyReceived] ?? false) {
                 //Le driver a déjà été importé par un autre modèle nous mergons recursivement uniquement les infos de modes. 

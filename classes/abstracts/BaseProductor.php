@@ -88,14 +88,36 @@ abstract class BaseProductor
             $productorModel = self::getStaticConfig('productorModel');
             // Filtre sur les permissions
             $bddTemplatesList = $productorModel::get(['name', 'slug'])->keyBy('slug')->toArray();
-            //trace_log($bddTemplatesList);
+            // trace_log('bddTemplatesList!!',$bddTemplatesList);
             $modelAccepted->addModels($bddTemplatesList);
         }
         if ($registrerFnc = self::getStaticConfig('productorFilesRegistration') ?? false) {
+            $productorModel = self::getStaticConfig('productorModel');
             $templatesData = PluginManager::instance()->getRegistrationMethodValues($registrerFnc);
             $templatesData = self::flattenPluginBundle($templatesData);
-            //trace_log($templatesData);
-            $modelAccepted->addModels($templatesData);
+            $templateToreturn = [];
+            // trace_log('templatesData!!',$templatesData);
+            foreach($templatesData as $templateKey=>$template) {
+                trace_log($template);
+                if(is_array($template)) {
+                    //cas des excel ou autre qui ont la config des élements dans le register. 
+                    $templateToreturn[$templateKey] = $template;
+                } else {
+                    try {
+                        $model = $productorModel::findBySlug($template);
+                        $templateToreturn[$model->slug] = [
+                        'name' => $model->name,
+                    ];
+                    } catch (\Exception $ex) {
+                        trace_log($ex->getMessage());
+                        //Model non compatible exemple System\Models\MailTemplate
+                    }
+                    
+                    
+                }
+            }
+            trace_log('templateToreturn!!',$templateToreturn);
+            $modelAccepted->addModels($templateToreturn);
         }
         $autorisedTemplates = $modelAccepted->check();
         foreach($autorisedTemplates as $key=>$template) {

@@ -21,7 +21,7 @@ return [
     ],
     'drivers' => [
         'success_label' => [
-            'close_download' => 'Télécharger le fichier',
+            'close_download' => 'Télécharger et fermer',
             'open_link' => 'Ouvrir le lien',
             'close_refresh' => 'Fermer et rafraîchir',
         ],
