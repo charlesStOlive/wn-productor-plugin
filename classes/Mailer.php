@@ -30,8 +30,6 @@ class Mailer extends BaseProductor
 
     public function execute($templateCode, $productorHandler, $allDatas): array
     {
-
-        //trace_log('Mailer : Execute-------------');
         $this->getBaseVars($allDatas);
         $subject = Arr::get($allDatas, 'productorDataArray.subject');
         $tos = Arr::get($allDatas, 'productorDataArray.tos');

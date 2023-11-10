@@ -13,7 +13,7 @@
                     <?php foreach ($drivers as $driverkey => $value) :
                         $productors = $value['productorModels'] ?? [];
                         if (count($productors)) : ?>
-                            <div class="optgroup">
+                            <div class="<?php if (count($drivers) == 1) : ?>optgroup_1<?php elseif (count($drivers) == 2): ?> optgroup_2<?php else: ?>optgroup <?php endif?>">
                                 <div class="wn-<?=$value['icon']?> label"><?= $value['label'] ?></div>
                                 <div>
                                     <?php

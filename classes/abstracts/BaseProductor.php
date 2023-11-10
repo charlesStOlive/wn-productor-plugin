@@ -98,7 +98,7 @@ abstract class BaseProductor
             $templateToreturn = [];
             // trace_log('templatesData!!',$templatesData);
             foreach($templatesData as $templateKey=>$template) {
-                trace_log($template);
+                //trace_log($template);
                 if(is_array($template)) {
                     //cas des excel ou autre qui ont la config des élements dans le register. 
                     $templateToreturn[$templateKey] = $template;
@@ -109,14 +109,14 @@ abstract class BaseProductor
                         'name' => $model->name,
                     ];
                     } catch (\Exception $ex) {
-                        trace_log($ex->getMessage());
+                        //trace_log($ex->getMessage());
                         //Model non compatible exemple System\Models\MailTemplate
                     }
                     
                     
                 }
             }
-            trace_log('templateToreturn!!',$templateToreturn);
+            //trace_log('templateToreturn!!',$templateToreturn);
             $modelAccepted->addModels($templateToreturn);
         }
         $autorisedTemplates = $modelAccepted->check();

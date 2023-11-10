@@ -37,7 +37,15 @@
     margin: 5px;
     border-radius: 5px;
     font-size: 12px;
-
+    color: #35425b;
+}
+#driverCode .optgroup_1 {
+    width: 100%;
+    background-color: gainsboro;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 5px;
+    font-size: 12px;
     color: #35425b;
 }
 
