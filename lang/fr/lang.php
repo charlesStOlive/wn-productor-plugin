@@ -9,31 +9,34 @@ return [
             'create' => 'Produire un élément',
         ],
     ],
-    'plugin' => [
-        'description' => 'Aucune description fournie pour le moment...',
-        'name' => 'Productor',
+    'blocks' => [
+        'ask_html' => [
+            'description' => 'Permet de modifier du contenu HTML',
+            'name' => 'HTML',
+        ],
+        'ask_image' => [
+            'description' => 'Permet de modifier une image',
+            'image' => 'Image',
+            'name' => 'Image',
+        ],
+        'richtext' => [
+            'content' => 'Contenus',
+        ],
     ],
     'driver' => [
         'mailer' => [
-            'label' => 'Mail (natif)',
             'description' => 'Envoie un email natif',
+            'label' => 'Mail (natif)',
         ],
     ],
     'drivers' => [
         'success_label' => [
             'close_download' => 'Télécharger et fermer',
-            'open_link' => 'Ouvrir le lien',
             'close_refresh' => 'Fermer et rafraîchir',
         ],
     ],
-    'blocks' => [
-        'ask_html' => [
-            'name' => 'HTML',
-            'description' => 'Permet de modifier du contenu HTML',
-        ],
-        'ask_image' => [
-            'name' => 'Image',
-            'description' => 'Permet de modifier une image',
-        ],
+    'plugin' => [
+        'description' => 'Aucune description fournie pour le moment...',
+        'name' => 'Productor',
     ],
 ];

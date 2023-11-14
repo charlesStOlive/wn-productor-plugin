@@ -7,7 +7,7 @@ fields:
         label: Code 
         required: true
     content:
-        label: wcli.wcms::lang.blocks.richtext.content
+        label: waka.productor::lang.blocks.richtext.content
         span: full
         type: wakaeditor                      
 ==

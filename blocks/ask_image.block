@@ -7,7 +7,7 @@ fields:
         label: Code 
         required: true
     image:
-        label: wcli.wcms::lang.blocks.richtext.content
+        label: waka.productor::lang.blocks.ask_image.image
         span: full
         type: mediafinder  
     width: 
