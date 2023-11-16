@@ -44,14 +44,6 @@ class Plugin extends PluginBase
     }
 
     /**
-     * Boot method, called right before the request route.
-     */
-    public function boot(): void
-    {
-
-    }
-
-    /**
      * Registers the custom Blocks provided by this plugin
      */
     public function registerBlocks(): array
@@ -62,41 +54,4 @@ class Plugin extends PluginBase
         ];
     }
 
-    /**
-     * Registers any frontend components implemented in this plugin.
-     */
-    public function registerComponents(): array
-    {
-        return []; // Remove this line to activate
-
-        return [
-            'Waka\Productor\Components\MyComponent' => 'myComponent',
-        ];
-    }
-
-    /**
-     * Registers any backend permissions used by this plugin.
-     */
-    public function registerPermissions(): array
-    {
-        return []; // Remove this line to activate
-    }
-
-    /**
-     * Registers backend navigation items for this plugin.
-     */
-    public function registerNavigation(): array
-    {
-        return []; // Remove this line to activate
-
-        return [
-            'productor' => [
-                'label'       => 'waka.productor::lang.plugin.name',
-                'url'         => Backend::url('waka/productor/mycontroller'),
-                'icon'        => 'icon-leaf',
-                'permissions' => ['waka.productor.*'],
-                'order'       => 500,
-            ],
-        ];
-    }
 }
