@@ -2,7 +2,7 @@
     <?php foreach ($productorBtns as $btn) : ?>
         <button type="button"
                 data-request="onExecute"
-                data-request-data="handler:'<?=$btn['handler']?>'"
+                data-request-data="handler:'<?=Crypt::encrypt($btn['handler'])?>'"
                 data-load-indicator="En cours..."
                 class="btn btn-default"
                 >

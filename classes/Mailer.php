@@ -7,6 +7,7 @@ use Closure;
 use Arr;
 use ApplicationException;
 
+
 class Mailer extends BaseProductor
 {
 
@@ -19,34 +20,28 @@ class Mailer extends BaseProductor
         'productor_yaml_config' => '~/plugins/waka/productor/models/mailer/productor_config.yaml',
         'noProductorBdd'=> true,
         'methods' => [
-            'sendEmail' => [
+            'prepareEmail' => [
                 'label' => 'Envoyer email',
-                'handler' => 'sendEmail',
+                'handler' => 'prepareEmail',
                 'btn' => [],
             ],
             
         ],
     ];
 
-    public function execute($templateCode, $productorHandler, $allDatas): array
+    public function prepareEmail($templateCode, $allDatas): array
     {
         $this->getBaseVars($allDatas);
         $subject = Arr::get($allDatas, 'productorDataArray.subject');
         $tos = Arr::get($allDatas, 'productorDataArray.tos');
         $subject = \Twig::parse($subject, $this->data);
-        //trace_log('allDatas!!',$allDatas);
-        //trace_log($this->data);
-        if ($productorHandler == "sendEmail") {
-            \Mail::send($templateCode, $this->data, function ($message) use ($tos, $subject) {
-                $message->to($tos);
-                $message->subject($subject);
-            });
-            return [
-                'message' => 'Mail envoyé avec succès',
-            ];
-        } else {
-            throw new ApplicationException('Mailer accepte comme handler uniquement sendEmail ');
-        }
+        \Mail::send($templateCode, $this->data, function ($message) use ($tos, $subject) {
+            $message->to($tos);
+            $message->subject($subject);
+        });
+        return [
+            'message' => 'Mail envoyé avec succès',
+        ];
     }
 
     /**
