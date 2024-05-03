@@ -18,7 +18,16 @@
                                 <div>
                                     <?php
                                     foreach ($productors as $productorKey => $value) :
-                                        if ($value['popup'] ?? false) : ?>
+                                        $valuePopup = $value['popup'] ?? false;
+                                        if ($driverkey == 'handlers' && $valuePopup) : ?>
+                                            <button class="option" data-handler="<?= $productorKey ?>" data-control="popup" data-request-loading="#wakaLoading2" data-dismiss="popup">
+                                                <?= $value['name'] ?>
+                                            </button>
+                                        <?php elseif ($valuePopup) : ?>
+                                            <button class="option" data-handler="<?= $productorKey ?>" data-control="popup" data-request-loading="#wakaLoading2" data-dismiss="popup">
+                                                <?= $value['name'] ?>
+                                            </button>
+                                        <?php elseif ($driverkey == 'handlers' && $valuePopup) : ?>
                                             <button class="option" data-handler="<?= $productorKey ?>" data-control="popup" data-request-loading="#wakaLoading2" data-dismiss="popup">
                                                 <?= $value['name'] ?>
                                             </button>

@@ -121,7 +121,7 @@ class ProductorBehavior extends ControllerBehavior
                 'productorModels' => $data
             ];
         });
-        // trace_log($drivers);
+        //trace_log($drivers);
         $manualHandlers = $this->getManualHandlers();
         //trace_log($manualHandlers);
         if (!empty($manualHandlers)) {
@@ -245,6 +245,7 @@ class ProductorBehavior extends ControllerBehavior
             $allDatas = array_merge($allDatas,  ['config' => $additionalConfig, 'productorDataArray' => $this->excelWidget->getSaveData()]);
         }
         try {
+            //trace_log('get_class productor driver',get_class($productorDriver));
             $result = $productorDriver->execute($productorSlug, $productorHandler, $allDatas);
             //trace_log('success----------------------------');
             return $this->handleProductorSuccess($result);

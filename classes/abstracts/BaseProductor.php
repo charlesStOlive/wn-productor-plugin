@@ -46,10 +46,10 @@ abstract class BaseProductor
             [$class, $method] = explode('::', $productorHandler);
 
             // Assurez-vous que la méthode existe
-            // trace_log($class);
-            // trace_log($method);
-            // trace_log(class_exists($class));
-            // trace_log(method_exists($class, $method));
+            //trace_log($class);
+            //trace_log($method);
+            //trace_log(class_exists($class));
+            //trace_log(method_exists($class, $method));
             if (class_exists($class) && method_exists($class, $method)) {
                 return call_user_func_array([$class, $method], [$templateCode, $allDatas]);
             } else {
@@ -80,7 +80,7 @@ abstract class BaseProductor
 
     protected function getBaseVars($allDatas)
     {
-        // trace_log('getBaseVars allDatas', $allDatas);
+        //trace_log('getBaseVars allDatas', $allDatas);
         $this->modelId = Arr::get($allDatas, 'modelId');
         $this->modelClass = Arr::get($allDatas, 'modelClass');
         $this->dsMap = Arr::get($allDatas, 'config.dsMap', null);
@@ -110,15 +110,15 @@ abstract class BaseProductor
     public static function getProductor($slug)
     {
         $productorClass = self::getStaticConfig('productorModel');
-        // trace_log($productorClass);
+        //trace_log($productorClass);
         if (method_exists($productorClass, 'findBySlug')) {
-            // trace_log('find by clug existe************');
+            //trace_log('find by clug existe************');
             return $productorClass::findBySlug($slug);
         } else if (self::getStaticConfig('noProductorBdd')) {
             //Il ny a pas de modèle dans la bdd on retourne vide, notamement pour les dsAsks
             return null;
         } else {
-            // trace_log('find by clug existe PAS ************');
+            //trace_log('find by clug existe PAS ************');
             //trace_log($productorClass);
             return $productorClass::where('slug', $slug)->first();
         }
@@ -135,7 +135,7 @@ abstract class BaseProductor
             $productorModel = self::getStaticConfig('productorModel');
             // Filtre sur les permissions
             $bddTemplatesList = $productorModel::get(['name', 'slug'])->keyBy('slug')->toArray();
-            // trace_log('bddTemplatesList!!',$bddTemplatesList);
+            //trace_log('bddTemplatesList!!',$bddTemplatesList);
             $modelAccepted->addModels($bddTemplatesList);
         }
         if ($registrerFnc = self::getStaticConfig('productorFilesRegistration') ?? false) {
@@ -143,7 +143,7 @@ abstract class BaseProductor
             $templatesData = PluginManager::instance()->getRegistrationMethodValues($registrerFnc);
             $templatesData = self::flattenPluginBundle($templatesData);
             $templateToreturn = [];
-            // trace_log('templatesData!!',$templatesData);
+            //trace_log('templatesData!!',$templatesData);
             foreach ($templatesData as $templateKey => $template) {
                 //trace_log($template);
                 if (is_array($template)) {

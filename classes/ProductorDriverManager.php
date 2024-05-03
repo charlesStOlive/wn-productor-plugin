@@ -56,7 +56,7 @@ class ProductorDriverManager
                 $drivers = array_merge($drivers, $driverReceived);
             }
         }
-        // trace_log($drivers);
+        //trace_log($drivers);
         return $drivers;
     }
 
@@ -74,13 +74,13 @@ class ProductorDriverManager
         //trace_log("$modelsKey",$specificDrivers);
         if ($specificDrivers) {
             foreach ($this->drivers as $key => $driver) {
-                // trace_log('key : '.$key, $specificDrivers);
+                //trace_log('key : '.$key, $specificDrivers);
                 //Recherche si la clef existe dans les clefs de config de drivers. 
                 if (in_array($key, $specificDrivers)) {
-                    // trace_log('cette clef existe : '.$key);
+                    //trace_log('cette clef existe : '.$key);
                     $allDrivers[$key] = $driver;
                 } else {
-                    // trace_log('cette clef existe PAS : '.$key);
+                    //trace_log('cette clef existe PAS : '.$key);
                 }
             }
         } else {
