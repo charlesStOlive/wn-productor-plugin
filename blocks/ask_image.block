@@ -17,6 +17,8 @@ fields:
     height:   
         label: Height 
         span: right 
-        default: 300                      
+        default: 300
+    url:   
+        label: URL                      
 ==
 {{ content | raw }}
