@@ -137,6 +137,7 @@ class ProductorIndexBehavior extends ControllerBehavior
             return $this->controller->{$productorSlug}();
         }
         $productorDriver = $this->driverManager->driver($driverCode);
+        
         $additionalConfig = $this->getAdditionalConfig(post('addedConfig'));
         //trace_log($dsMap);
         if ($productorDriver->getStaticConfig('use_import_file_widget') ?? false) {
@@ -167,7 +168,15 @@ class ProductorIndexBehavior extends ControllerBehavior
 
     protected function getManualHandlers()
     {
-        return $this->config->productorIndex['handlers'] ?? [];
+        $handlers = $this->config->productorIndex['handlers'] ?? null;
+        if (!$handlers) {
+            return;
+        }
+        return [
+            'label' =>  $handlers['label'] ?? 'Autre opération',
+            'icon' => 'icon-cog',
+            'productorModels' => $handlers['requests']
+        ];
     }
 
     public function updateProductorIndexConfig($productorIndexConfig)

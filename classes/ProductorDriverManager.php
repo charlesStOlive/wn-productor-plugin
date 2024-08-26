@@ -36,9 +36,13 @@ class ProductorDriverManager
     {
         $drivers = [];
         $productorConfig = [];
-        $productorconfig = $config->productor ?? [];
+        if($forIndex) {
+            $productorConfig = $config->productorIndex ?? [];
+        } else {
+            $productorConfig = $config->productor ?? [];
+        }
         $globalDsMap = $config->dsMap ?? null;
-        $productorModels = $productorconfig['models'] ?? [];
+        $productorModels = $productorConfig['models'] ?? [];
         //
         foreach ($productorModels as $modelsKey => $modelsConfig) {
             if(!$modelsConfig) $modelsConfig = [];

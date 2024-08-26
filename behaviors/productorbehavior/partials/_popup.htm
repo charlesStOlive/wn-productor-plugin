@@ -11,6 +11,7 @@
             <div class="form-group">
                 <div class="custom-select" id="driverCode">
                     <?php foreach ($drivers as $driverkey => $value) :
+                        //trace_log($value);
                         $productors = $value['productorModels'] ?? [];
                         if (count($productors)) : ?>
                             <div class="<?php if (count($drivers) == 1) : ?>optgroup_1<?php elseif (count($drivers) == 2): ?> optgroup_2<?php else: ?>optgroup <?php endif?>">
@@ -19,6 +20,7 @@
                                     <?php
                                     foreach ($productors as $productorKey => $value) :
                                         $valuePopup = $value['popup'] ?? false;
+                                        //trace_log('valuePopup'. $valuePopup);
                                         if ($driverkey == 'handlers' && $valuePopup) : ?>
                                             <button class="option" data-handler="<?= $productorKey ?>" data-control="popup" data-request-loading="#wakaLoading2" data-dismiss="popup">
                                                 <?= $value['name'] ?>
@@ -28,7 +30,7 @@
                                                 <?= $value['name'] ?>
                                             </button>
                                         <?php elseif ($driverkey == 'handlers' && $valuePopup) : ?>
-                                            <button class="option" data-handler="<?= $productorKey ?>" data-control="popup" data-request-loading="#wakaLoading2" data-dismiss="popup">
+                                            <button class="option" data-handler="<?= $productorKey ?>" data-control="popup" data-request-data="driverCode:'<?= $driverkey ?>',productorSlug:'<?= $productorKey ?>',addedConfig:'<?=e(json_encode($value))?>'" data-dismiss="popup">
                                                 <?= $value['name'] ?>
                                             </button>
                                         <?php elseif ($driverkey == 'handlers') : ?>
